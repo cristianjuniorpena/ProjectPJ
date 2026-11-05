@@ -1,14 +1,40 @@
 # Python
-.venv/
 __pycache__/
-*py[cod]
+*.py[cod]
+*.pyo
+*.pyd
 
-# Enviroment variables
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Variáveis de ambiente e credenciais
 .env
+.env.*
+!.env.example
 
-# Node
-.node_modules/
+# Testes e cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ferramentas Python
+.mypy_cache/
+.ruff_cache/
+
+# Node.js
+node_modules/
 dist/
+.npm/
 
-# IDE
+# IDEs e editores
 .vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
