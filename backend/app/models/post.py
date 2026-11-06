@@ -1,4 +1,5 @@
 from __future__ import annotations 
+from typing import TYPE_CHECKING
 
 from datetime import datetime
 from decimal import Decimal
@@ -19,7 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
-from typing import TYPE_CHECKING
+
 
 if TYPE_CHECKING:
     from app.models.user import User
