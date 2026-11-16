@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.api.routes.auth import router as auth_router
 
-from app.api.dependencies import get_db
+from app.api.dependencies import get_database
 
 app = FastAPI(
     title="PJ Platform API",
@@ -14,7 +14,7 @@ app = FastAPI(
 app.include_router(auth_router)
 
 @app.get("/database-test")
-def db_test(database: Session = Depends(get_db)):
+def db_test(database: Session = Depends(get_database)):
     result = database.execute(
         text("SELECT current_database()")
     ).scalar_one()
