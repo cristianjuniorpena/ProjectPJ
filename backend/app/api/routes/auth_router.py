@@ -12,11 +12,6 @@ router = APIRouter(
 )
 
 
-@router.post("/register", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED,)
-def create_user(
-    user_data: UserCreateSchema,
-    database: Session = Depends(get_database),
-):
-    return register_user(database, user_data)
-
-
+@router.post("/register", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED)
+def create_user(user_data: UserCreateSchema, db: Session = Depends(get_database),):
+    return register_user(db, user_data)

@@ -17,12 +17,7 @@ def email_existing_verification(database: Session, email: str) -> bool:
     return existing_user is not None
 
 def instantiate_user(user_data: UserCreateSchema, email: str) -> User:
-    user = User(
-        name=user_data.name,
-        email=email,
-        password_hash=hash_password(user_data.password),
-        role=user_data.role,
-    )
+    user = User(user_data.name, email, hash_password(user_data.password), user_data.role)
     return user
 
 def register_user_in_database(database: Session, user: User) -> User:
