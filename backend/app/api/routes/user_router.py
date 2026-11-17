@@ -23,10 +23,10 @@ async def get_all_users(database: Session = Depends(get_database)):
 
 @user_router.get('/me', status_code=status.HTTP_200_OK)
 async def get_current_user(database: Session = Depends(get_database)):
-    all_users = authenticate_user(database, 'contratante@email.com', 'contratante123')
+    current_user = authenticate_user(database, 'contratante@email.com', 'contratante123')
     return {
         'status' : 'ok',
-        'users' : all_users
+        'current_user' : current_user
         }   
 
 @user_router.delete('/delete', status_code=status.HTTP_200_OK)

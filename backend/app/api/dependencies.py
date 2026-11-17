@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from collections.abc import Generator
 
 from app.database.session import SessionLocal
+from app.core.config import settings
+from app.schemas.auth import TokenResponse
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -22,6 +24,25 @@ token_router = APIRouter(
     prefix="/token",
     tags=["router for tokens"],
 )
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+        token_data = TokenResponse(acess_token=user_id)
+    except InvalidTokenError:
+        raise credentials_exception
+    user = get_user(fake_users_db, user_id=token_data.access_token)
+    if user is None:
+        raise credentials_exception
+    return user
 
 # @token_router.post('/', status_code=status.HTTP_200_OK)
 # async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:

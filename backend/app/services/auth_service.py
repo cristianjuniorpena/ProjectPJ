@@ -20,7 +20,7 @@ def instantiate_user(user_data: UserCreateSchema, email: str) -> User:
     user = User(user_data.name, email, hash_password(user_data.password), user_data.role)
     return user
 
-def register_user_in_database(database: Session, user: User) -> User:
+def insert_user_in_database(database: Session, user: User) -> User:
     try:
         database.add(user)
         database.commit()
@@ -42,7 +42,7 @@ def register_user_in_database(database: Session, user: User) -> User:
             ) from error
 
         raise
-
+    
     return user
     
 
@@ -57,4 +57,4 @@ def register_user(database: Session, user_data: UserCreateSchema) -> User:
 
     user = instantiate_user(user_data, email)
 
-    return register_user_in_database(database, user)
+    return insert_user_in_database(database, user)
