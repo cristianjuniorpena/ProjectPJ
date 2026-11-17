@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from app.api.dependencies import get_database
 from app.schemas.user import UserCreateSchema, UserReadSchema
