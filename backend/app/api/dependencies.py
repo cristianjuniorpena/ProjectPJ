@@ -1,4 +1,7 @@
 from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import jwt
+from jwt.exceptions import InvalidTokenError
 from typing import Annotated
 
 from sqlalchemy.orm import Session
@@ -6,6 +9,7 @@ from collections.abc import Generator
 
 from app.database.session import SessionLocal
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def get_database() -> Generator[Session, None, None]:
     database = SessionLocal()
