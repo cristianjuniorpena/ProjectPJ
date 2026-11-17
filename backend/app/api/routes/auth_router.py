@@ -6,12 +6,12 @@ from app.schemas.user import UserCreateSchema, UserReadSchema
 from app.services.auth_service import register_user
 
 
-router = APIRouter(
+auth_router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
 )
 
 
-@router.post("/register", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED,)
-def create_user(user_data: UserCreateSchema, db: Session = Depends(get_database),):
+@auth_router.post("/register", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED)
+async def create_user(user_data: UserCreateSchema, db: Session = Depends(get_database),):
     return register_user(db, user_data)

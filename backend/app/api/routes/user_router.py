@@ -3,17 +3,27 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.api.dependencies import get_database
-from app.schemas.user import UserCreateSchema, UserReadSchema
-from app.services.auth_service import register_user
-from app.models.user import User
+from app.services.auth_user import get_users_from_database, authenticate_user
 
-router = APIRouter(
+
+user_router = APIRouter(
     prefix="/user",
     tags=["users"],
 )
 
 
-@router.get('/')
-def get_users(database: Session = Depends(get_database)):
-    all_users = database.execute(select(User)).all()
-    return {'users' : all_users}
+@user_router.get('/', status_code=status.HTTP_200_OK)
+async def get_all_users(database: Session = Depends(get_database)):
+    all_users = get_users_from_database(database)
+    return {
+        'status' : 'ok',
+        'users' : all_users
+        }   
+
+@user_router.get('/me', status_code=status.HTTP_200_OK)
+async def get_current_user(database: Session = Depends(get_database)):
+    all_users = authenticate_user(database, 'contratante@email.com', 'contratante123')
+    return {
+        'status' : 'ok',
+        'users' : all_users
+        }   

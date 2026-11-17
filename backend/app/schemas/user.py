@@ -19,3 +19,11 @@ class UserReadSchema(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class UserSelectSchema(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    password_hash: str
+    role: Literal["contractor", "provider"]
+    created_at: datetime
