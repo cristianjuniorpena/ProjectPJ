@@ -36,6 +36,7 @@ def register_user(database: Session, user_data: UserCreateSchema) -> User:
     return insert_user_in_database(database, user)
 
 def authenticate_user(database: Session, email: str, password: str):
+    email = normalize_email(email)
     user_id = get_id_by_email(database, email)
     user = get_user(database, user_id)
     if not user:

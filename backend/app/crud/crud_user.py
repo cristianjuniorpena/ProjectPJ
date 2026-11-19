@@ -15,8 +15,8 @@ def get_users_in_database(database: Session):
     all_users = query.scalars().all()
     return all_users
 
-def get_user(database: Session, id: str):
-    query = database.execute(select(User).where(User.id == id))
+def get_user(database: Session, user_id: int):
+    query = database.execute(select(User).where(User.id == user_id))
     user = query.scalars().first()
     return user
 

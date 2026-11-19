@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -18,7 +18,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(user_router)
 
-@app.get("/database-test")
+@app.get("/database-test", status_code=status.HTTP_200_OK)
 async def database_test(database: Session = Depends(get_database)):
     result = database.execute(
         text("SELECT current_database()")
@@ -29,10 +29,10 @@ async def database_test(database: Session = Depends(get_database)):
         "database": result
     }
 
-@app.get("/")
+@app.get("/", status_code=status.HTTP_200_OK)
 async def root():
     return { "message" : "API is running"}
 
-@app.get("/status")
+@app.get("/status", status_code=status.HTTP_200_OK)
 async def root():
     return { "status" : "healthy"}

@@ -1,18 +1,23 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import jwt
-from jwt.exceptions import InvalidTokenError
+from collections.abc import Generator
 from typing import Annotated
 
+import jwt
+from fastapi import Depends, HTTPException, status
+from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
-from collections.abc import Generator
 
-from app.database.session import SessionLocal
 from app.core.config import settings
-from app.schemas.auth import TokenResponse
+from app.core.security import oauth2_scheme
 from app.crud.crud_user import get_user
+from app.database.session import SessionLocal
+from app.models.user import User
+from app.schemas.auth import TokenData
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 def get_database() -> Generator[Session, None, None]:
     database = SessionLocal()
@@ -21,27 +26,15 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         database.close()
 
-token_router = APIRouter(
-    prefix="/token",
-    tags=["router for tokens"],
-)
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], database: Session = Depends(get_database)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], database: Annotated[Session, Depends(get_database)]) -> User:  
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-        token_data = TokenResponse(user_id=user_id)
-    except InvalidTokenError:
-        raise credentials_exception
-    user = get_user(database, user_id=token_data.access_token)
+        token_data = TokenData(user_id=int(payload["sub"]), email=payload.get("email"))
+    except (InvalidTokenError, KeyError, TypeError, ValueError):
+        raise credentials_exception from None
+    user = get_user(database, user_id=token_data.user_id)
     if user is None:
         raise credentials_exception
-    return user
 
+    return user
