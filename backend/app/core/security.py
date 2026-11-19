@@ -10,7 +10,7 @@ def create_payload_token(user_id: str, email: str, expire_time: timedelta | None
     if expire_time:
         expire = datetime.now(UTC) + expire_time
     else:
-        expire = datetime.now(UTC) + timedelta(int(settings.ACESS_TOKEN_EXPIRE_MINUTES))
+        expire = datetime.now(UTC) + timedelta(int(settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     payload = {'sub' : user_id, 'exp' : expire}
     return payload
 

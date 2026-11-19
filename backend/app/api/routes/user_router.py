@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.api.dependencies import get_database
-from app.services.auth_user import authenticate_user
-from app.crud.crud_user import get_user, get_users_from_database, delete_user_from_database, get_id_by_email
+from app.services.auth_service import authenticate_user
+from app.crud.crud_user import get_user, get_users_in_database, delete_user_in_database, get_id_by_email
 
 
 user_router = APIRouter(
@@ -15,7 +15,7 @@ user_router = APIRouter(
 
 @user_router.get('/', status_code=status.HTTP_200_OK)
 async def get_all_users(database: Session = Depends(get_database)):
-    all_users = get_users_from_database(database)
+    all_users = get_users_in_database(database)
     return {
         'status' : 'ok',
         'users' : all_users
@@ -34,7 +34,7 @@ async def delete_user(database: Session = Depends(get_database), email: str | No
     if email == None:
         raise HTTPException()
     user_id = get_id_by_email(database, email)
-    delete_user_from_database(database, user_id)
+    delete_user_in_database(database, user_id)
     return {
         'status' : 'sucesso',
         'mensagem' : f'usuario de id {user_id} deletado'

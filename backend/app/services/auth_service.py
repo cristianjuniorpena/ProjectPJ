@@ -1,11 +1,13 @@
-from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
-from app.core.security import hash_password
+from app.crud.crud_user import get_id_by_email, get_user, insert_user_in_database
+from app.core.security import hash_password, verify_password_hash
 from app.models.user import User
 from app.schemas.user import UserCreateSchema
+from app.core.config import settings
 
 def normalize_email(email: str) -> str:
     return email.strip().lower()
@@ -20,32 +22,6 @@ def instantiate_user(user_data: UserCreateSchema, email: str) -> User:
     user = User(user_data.name, email, hash_password(user_data.password), user_data.role)
     return user
 
-def insert_user_in_database(database: Session, user: User) -> User:
-    try:
-        database.add(user)
-        database.commit()
-        database.refresh(user)
-
-    except IntegrityError as error:
-        database.rollback()
-
-        constraint_name = getattr(
-            getattr(error.orig, "diag", None),
-            "constraint_name",
-            None,
-        )
-
-        if constraint_name == "uq_users_email":
-            raise HTTPException(
-                status_code=409,
-                detail="Email already registered",
-            ) from error
-
-        raise
-    
-    return user
-    
-
 def register_user(database: Session, user_data: UserCreateSchema) -> User:
     email = normalize_email(str(user_data.email))
 
@@ -58,3 +34,13 @@ def register_user(database: Session, user_data: UserCreateSchema) -> User:
     user = instantiate_user(user_data, email)
 
     return insert_user_in_database(database, user)
+
+def authenticate_user(database: Session, email: str, password: str):
+    user_id = get_id_by_email(database, email)
+    user = get_user(database, user_id)
+    if not user:
+        verify_password_hash(password, settings.DUMMY_HASH)
+        return False
+    if not verify_password_hash(password, user.password_hash):
+        return False
+    return user

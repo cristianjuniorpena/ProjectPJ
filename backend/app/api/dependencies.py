@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -10,8 +10,9 @@ from collections.abc import Generator
 from app.database.session import SessionLocal
 from app.core.config import settings
 from app.schemas.auth import TokenResponse
+from app.crud.crud_user import get_user
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_database() -> Generator[Session, None, None]:
     database = SessionLocal()
@@ -25,7 +26,7 @@ token_router = APIRouter(
     tags=["router for tokens"],
 )
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], database: Session = Depends(get_database)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -36,25 +37,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-        token_data = TokenResponse(acess_token=user_id)
+        token_data = TokenResponse(user_id=user_id)
     except InvalidTokenError:
         raise credentials_exception
-    user = get_user(fake_users_db, user_id=token_data.access_token)
+    user = get_user(database, user_id=token_data.access_token)
     if user is None:
         raise credentials_exception
     return user
 
-# @token_router.post('/', status_code=status.HTTP_200_OK)
-# async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-#     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Incorrect username or password",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-#     access_token = create_access_token(
-#         data={"sub": user.username}, expires_delta=access_token_expires
-#     )
-#     return Token(access_token=access_token, token_type="bearer")

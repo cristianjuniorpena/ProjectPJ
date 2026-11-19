@@ -8,6 +8,6 @@ class Settings(BaseModel):
     DATABASE_URL: str = os.getenv("DATABASE_URL")
     ALGORITHM: str = os.getenv("ALGORITHM")
     SECRET_KEY: str = os.getenv("SECRET_KEY")
-    ACESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACESS_TOKEN_EXPIRE_MINUTES")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
     DUMMY_HASH: str = os.getenv("DUMMY_HASH")
 settings = Settings()
