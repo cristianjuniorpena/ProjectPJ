@@ -1,8 +1,8 @@
-from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from decimal import Decimal
 from typing import Literal
-
-from pydantic import BaseModel, ConfigDict, Field
+from datetime import datetime
 
 
 class PostCreate(BaseModel):
@@ -18,6 +18,17 @@ class PostUpdate(BaseModel):
     category: str | None = Field(default=None, min_length=2, max_length=100)
     budget: Decimal | None = Field(default=None, ge=0)
     status: Literal["open", "closed"] | None = None
+
+    @model_validator(mode="after")
+    def validate_non_nullable_fields(self):
+        non_nullable = {"title", "description", "category", "status"}
+
+        for field in non_nullable:
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null")
+
+        return self
+
 
 class PostRead(BaseModel):
     id: int

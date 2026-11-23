@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.user import User
-from app.exceptions.exceptions import UserAlreadyExistsError, UserDeletionConflictError
+from app.exceptions.user_exceptions import UserAlreadyExistsError, UserDeletionConflictError
 
 
 
