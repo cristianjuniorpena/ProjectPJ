@@ -56,6 +56,21 @@ def insert_post(
 
     return post
 
+def verify_invalid_fields(update_data: dict) -> bool:
+allowed_fields = {
+        "title",
+        "description",
+        "category",
+        "budget",
+        "status"
+    }
+
+    invalid_fields = set(update_data.keys()) - allowed_fields
+
+    if invalid_fields:
+        return True
+    return False
+
 
 def update_post(
     database: Session,
@@ -68,20 +83,8 @@ def update_post(
     if post is None:
         return None
 
-    allowed_fields = {
-        "title",
-        "description",
-        "category",
-        "budget",
-        "status"
-    }
-
-    invalid_fields = set(update_data.keys()) - allowed_fields
-
-    if invalid_fields:
-        raise ValueError(
-            f"Fields cannot be updated: {invalid_fields}"
-        )
+    if verify_invalid_fields(update_data):
+        raise ValueError("não se pode alterar campos inválidos")
 
     if not update_data:
         return post
