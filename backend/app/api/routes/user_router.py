@@ -28,12 +28,9 @@ async def read_user_me(current_user: Annotated[User, Depends(get_current_user)])
     return current_user
 
 @user_router.delete('/delete', status_code=status.HTTP_200_OK)
-async def delete_user(database: Session = Depends(get_database), email: str | None = None):
-    if email == None:
-        raise HTTPException()
-    user_id = get_id_by_email(database, email)
-    delete_user_in_database(database, user_id)
+async def delete_user(database: Session = Depends(get_database), current_user: User = Depends(get_current_user)):
+    delete_user_in_database(database, current_user.id)
     return {
         'status' : 'sucesso',
-        'mensagem' : f'usuario de id {user_id} deletado'
+        'mensagem' : f'usuario de id {current_user.id} deletado'
     }
