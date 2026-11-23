@@ -1,43 +1,20 @@
 
 from typing import Annotated
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Query,
-    status
-)
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import (
-    get_database,
-    get_current_user
-)
+from app.api.dependencies import get_database, get_current_user
 
 from app.models.user import User
 
-from app.schemas.post import (
-    PostCreate,
-    PostUpdate,
-    PostRead
-)
+from app.schemas.post import PostCreate, PostUpdate, PostRead
 
-from app.services.post_service import (
-    list_posts,
-    read_post,
-    create_post,
-    edit_post,
-    remove_post
-)
+from app.services.post_service import list_posts, read_post, create_post, edit_post, remove_post
 
-from app.exceptions.post_exceptions import (
-    PostNotFoundError,
-    PostPermissionError,
-    PostRoleError,
-    PostDeletionConflictError
-)
+from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError, PostDeletionConflictError
+
 
 
 post_router = APIRouter(
@@ -46,7 +23,7 @@ post_router = APIRouter(
 )
 
 
-DatabaseDep = Annotated[Session, Depends(get_database)]
+database_dependencie = Annotated[Session, Depends(get_database)]
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 
@@ -56,7 +33,7 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
     status_code=status.HTTP_200_OK
 )
 def get_all_posts(
-    database: DatabaseDep,
+    database: database_dependencie,
     current_user: CurrentUserDep,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0)
@@ -71,7 +48,7 @@ def get_all_posts(
 )
 def get_post(
     post_id: int,
-    database: DatabaseDep,
+    database: database_dependencie,
     current_user: CurrentUserDep
 ):
     try:
@@ -91,7 +68,7 @@ def get_post(
 )
 def create_new_post(
     post_data: PostCreate,
-    database: DatabaseDep,
+    database: database_dependencie,
     current_user: CurrentUserDep
 ):
     try:
@@ -112,7 +89,7 @@ def create_new_post(
 def update_existing_post(
     post_id: int,
     post_data: PostUpdate,
-    database: DatabaseDep,
+    database: database_dependencie,
     current_user: CurrentUserDep
 ):
     try:
@@ -142,7 +119,7 @@ def update_existing_post(
 )
 def delete_existing_post(
     post_id: int,
-    database: DatabaseDep,
+    database: database_dependencie,
     current_user: CurrentUserDep
 ):
     try:

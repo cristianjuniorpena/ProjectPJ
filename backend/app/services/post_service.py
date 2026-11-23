@@ -1,59 +1,16 @@
 
 from sqlalchemy.orm import Session
 
-from app.crud.crud_post import (
-    get_all_posts,
-    get_post,
-    insert_post,
-    update_post,
-    delete_post
-)
+from app.crud.crud_post import get_all_posts, get_post, insert_post, update_post, delete_post
 
 from app.models.post import Post
 from app.models.user import User
 
 from app.schemas.post import PostCreate, PostUpdate
 
-from app.exceptions.post_exceptions import (
-    PostNotFoundError,
-    PostPermissionError,
-    PostRoleError
-)
+from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError
 
-
-def list_posts(
-    database: Session,
-    limit: int = 100,
-    offset: int = 0
-) -> list[Post]:
-
-    return get_all_posts(database, limit, offset)
-
-
-def read_post(
-    database: Session,
-    post_id: int
-) -> Post:
-
-    post = get_post(database, post_id)
-
-    if post is None:
-        raise PostNotFoundError()
-
-    return post
-
-
-def create_post(
-    database: Session,
-    post_data: PostCreate,
-    current_user: User
-) -> Post:
-
-    if current_user.role != "contractor":
-        raise PostRoleError(
-            "Only contractors can create posts."
-        )
-
+def instantiate_post(post_data: PostCreate):
     post = Post(
         title=post_data.title,
         description=post_data.description,
@@ -62,17 +19,34 @@ def create_post(
         user_id=current_user.id,
         status="open"
     )
+    return post
+
+def list_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
+    return get_all_posts(database, limit, offset)
+
+
+def read_post(database: Session, post_id: int) -> Post:
+    post = get_post(database, post_id)
+    if post is None:
+        raise PostNotFoundError()
+
+    return post
+
+def verify_current_user_role(current_user: User) -> str:
+    return current_user.role
+
+def create_post(database: Session, post_data: PostCreate, current_user: User) -> Post:
+    current_user_role = verify_current_user_role(current_user=current_user)
+
+    if current_user_role != "contractor":
+        raise PostRoleError(
+            "Only contractors can create posts."
+        )
 
     return insert_post(database, post)
 
 
-def edit_post(
-    database: Session,
-    post_id: int,
-    post_data: PostUpdate,
-    current_user: User
-) -> Post:
-
+def edit_post(database: Session, post_id: int, post_data: PostUpdate, current_user: User) -> Post:
     post = read_post(database, post_id)
 
     if post.user_id != current_user.id:
@@ -87,11 +61,7 @@ def edit_post(
 
     update_data = post_data.model_dump(exclude_unset=True)
 
-    updated_post = update_post(
-        database,
-        post_id,
-        update_data
-    )
+    updated_post = update_post(database, post_id, update_data)
 
     if updated_post is None:
         raise PostNotFoundError()
@@ -99,12 +69,7 @@ def edit_post(
     return updated_post
 
 
-def remove_post(
-    database: Session,
-    post_id: int,
-    current_user: User
-) -> bool:
-
+def remove_post(database: Session, post_id: int, current_user: User) -> bool:
     post = read_post(database, post_id)
 
     if post.user_id != current_user.id:

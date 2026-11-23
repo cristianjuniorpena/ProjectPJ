@@ -12,7 +12,6 @@ from app.exceptions.user_exceptions import UserAlreadyExistsError, UserDeletionC
 
 def get_id_by_email(database: Session, email: str) -> int | None:
     statement = select(User.id).where(User.email == email)
-
     return database.scalar(statement)
 
 
@@ -38,11 +37,8 @@ def get_users_in_database(
     return list(database.scalars(statement).all())
 
 
-def get_user(database: Session, user_id: int) -> User | None:
-    if user_id <= 0:
-        return None
-
-    return database.get(User, user_id)
+def get_user(database: Session, user_email: int) -> User | None:
+    return database.get(User, user_email)
 
 
 def delete_user_in_database(

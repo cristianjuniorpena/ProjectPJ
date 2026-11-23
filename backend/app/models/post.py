@@ -100,3 +100,4 @@ class Post(Base):
     user: Mapped[User] = relationship(
         back_populates="posts",
     )
+

@@ -25,14 +25,9 @@ def get_all_posts(database: Session, limit: int = 100, offset: int = 0) -> list[
     return list(database.scalars(statement).all())
 
 
-def get_post(
-    database: Session,
-    post_id: int
-) -> Post | None:
-
+def get_post(database: Session, post_id: int) -> Post | None:
     if post_id <= 0:
         return None
-
     return database.get(Post, post_id)
 
 
@@ -57,13 +52,13 @@ def insert_post(
     return post
 
 def verify_invalid_fields(update_data: dict) -> bool:
-allowed_fields = {
-        "title",
-        "description",
-        "category",
-        "budget",
-        "status"
-    }
+    allowed_fields = {
+            "title",
+            "description",
+            "category",
+            "budget",
+            "status"
+        }
 
     invalid_fields = set(update_data.keys()) - allowed_fields
 
@@ -72,14 +67,9 @@ allowed_fields = {
     return False
 
 
-def update_post(
-    database: Session,
-    post_id: int,
-    update_data: dict
-) -> Post | None:
+def update_post(database: Session, post_id: int, update_data: dict) -> Post | None:
 
-    post = database.get(Post, post_id)
-
+    post = get_post(post_id=post_id)
     if post is None:
         return None
 
@@ -92,14 +82,11 @@ def update_post(
     try:
         for field, value in update_data.items():
             setattr(post, field, value)
-
         database.commit()
         database.refresh(post)
-
     except IntegrityError:
         database.rollback()
         raise
-
     except SQLAlchemyError:
         database.rollback()
         raise
@@ -107,13 +94,9 @@ def update_post(
     return post
 
 
-def delete_post(
-    database: Session,
-    post_id: int
-) -> bool:
+def delete_post(database: Session, post_id: int) -> bool:
 
-    post = database.get(Post, post_id)
-
+    post = get_post(post_id)
     if post is None:
         return False
 
