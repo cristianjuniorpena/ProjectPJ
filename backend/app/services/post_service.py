@@ -22,7 +22,7 @@ def instantiate_post(post_data: PostCreate, current_user: User):
     return post
 
 def list_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
-    return select_all_posts(database, limit, offset)
+    return select_all_posts(database=database, limit=limit, offset=offset)
 
 def read_post(database: Session, post_id: int) -> Post:
     post = select_post(database, post_id)
@@ -33,7 +33,7 @@ def read_post(database: Session, post_id: int) -> Post:
 def read_current_user_posts(database: Session, current_user: User) -> list[Post]:
     if current_user.role != "contractor":
          raise PostRoleError(
-            "Only contractors can create posts."
+            "Only contractors can read their own posts."
         )
     return select_user_posts(database=database, user_id=current_user.id)
 
@@ -51,14 +51,14 @@ def create_post(database: Session, post_data: PostCreate, current_user: User) ->
 def edit_post(database: Session, post_id: int, post_data: PostUpdate, current_user: User) -> Post:
     post = read_post(database, post_id)
 
-    if post.user_id != current_user.id:
-        raise PostPermissionError(
-            "You cannot modify another user's post."
-        )
-
     if current_user.role != "contractor":
         raise PostRoleError(
             "Only contractors can modify posts."
+        )
+
+    if post.user_id != current_user.id:
+        raise PostPermissionError(
+            "You cannot modify another user's post."
         )
 
     update_data = post_data.model_dump(exclude_unset=True)
@@ -71,17 +71,17 @@ def edit_post(database: Session, post_id: int, post_data: PostUpdate, current_us
     return updated_post
 
 
-def remove_post(database: Session, post_id: int, current_user: User) -> bool:
+def remove_post(database: Session, post_id: int, current_user: User) -> Post:
     post = read_post(database, post_id)
-
-    if post.user_id != current_user.id:
-        raise PostPermissionError(
-            "You cannot delete another user's post."
-        )
 
     if current_user.role != "contractor":
         raise PostRoleError(
             "Only contractors can delete posts."
+        )
+
+    if post.user_id != current_user.id:
+        raise PostPermissionError(
+            "You cannot delete another user's post."
         )
 
     deleted = delete_post(database, post_id)

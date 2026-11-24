@@ -18,12 +18,9 @@ def read_user(database: Session, user_id: int) -> User:
     return user
 
 def list_users(database: Session, limit: int = 100, offset: int = 0) -> list[User]:
-    users = select_users_in_database(database=database, limit=limit, offset=offset)
-    return users
+    return select_users_in_database(database=database, limit=limit, offset=offset)
 
 def remove_user(database: Session, user_id: int) -> None:
-    read_user(database, user_id)
-
     deleted = delete_user_in_database(database=database, user_id=user_id)
 
     if not deleted:
