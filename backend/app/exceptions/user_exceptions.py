@@ -4,3 +4,6 @@ class UserDeletionConflictError(Exception):
 
 class UserAlreadyExistsError(Exception):
     """Indica que o email já está cadastrado."""
+
+class UserNotFound(Exception):
+    """Indica que o usuário não existe"""

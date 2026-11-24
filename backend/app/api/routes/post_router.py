@@ -24,7 +24,7 @@ post_router = APIRouter(
 
 
 database_dependencie = Annotated[Session, Depends(get_database)]
-CurrentUserDep = Annotated[User, Depends(get_current_user)]
+current_user_dependencie = Annotated[User, Depends(get_current_user)]
 
 
 @post_router.get(
@@ -32,12 +32,7 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
     response_model=list[PostRead],
     status_code=status.HTTP_200_OK
 )
-def get_all_posts(
-    database: database_dependencie,
-    current_user: CurrentUserDep,
-    limit: int = Query(default=20, ge=1, le=100),
-    offset: int = Query(default=0, ge=0)
-):
+def get_all_posts(database: database_dependencie, limit: int = Query(default=20, ge=1, le=100), offset: int = Query(default=0, ge=0)):
     return list_posts(database, limit, offset)
 
 
@@ -46,11 +41,7 @@ def get_all_posts(
     response_model=PostRead,
     status_code=status.HTTP_200_OK
 )
-def get_post(
-    post_id: int,
-    database: database_dependencie,
-    current_user: CurrentUserDep
-):
+def get_post(post_id: int, database: database_dependencie):
     try:
         return read_post(database, post_id)
 
@@ -69,11 +60,10 @@ def get_post(
 def create_new_post(
     post_data: PostCreate,
     database: database_dependencie,
-    current_user: CurrentUserDep
+    current_user: current_user_dependencie
 ):
     try:
         return create_post(database, post_data, current_user)
-
     except PostRoleError as error:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -90,7 +80,7 @@ def update_existing_post(
     post_id: int,
     post_data: PostUpdate,
     database: database_dependencie,
-    current_user: CurrentUserDep
+    current_user: current_user_dependencie
 ):
     try:
         return edit_post(
@@ -117,11 +107,7 @@ def update_existing_post(
     "/{post_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
-def delete_existing_post(
-    post_id: int,
-    database: database_dependencie,
-    current_user: CurrentUserDep
-):
+def delete_existing_post(post_id: int, database: database_dependencie, current_user: current_user_dependencie):
     try:
         remove_post(database, post_id, current_user)
 
@@ -143,4 +129,7 @@ def delete_existing_post(
             detail="Post cannot be deleted due to related records"
         )
 
-    return None
+    return { 
+        "status" : "sucesso",
+        "mensagem" : f"post de id {post_id} deletado"
+        }

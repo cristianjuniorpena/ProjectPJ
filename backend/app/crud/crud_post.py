@@ -31,11 +31,7 @@ def get_post(database: Session, post_id: int) -> Post | None:
     return database.get(Post, post_id)
 
 
-def insert_post(
-    database: Session,
-    post: Post
-) -> Post:
-
+def insert_post(database: Session, post: Post) -> Post:
     try:
         database.add(post)
         database.commit()
@@ -69,7 +65,7 @@ def verify_invalid_fields(update_data: dict) -> bool:
 
 def update_post(database: Session, post_id: int, update_data: dict) -> Post | None:
 
-    post = get_post(post_id=post_id)
+    post = get_post(database=database, post_id=post_id)
     if post is None:
         return None
 
@@ -96,7 +92,7 @@ def update_post(database: Session, post_id: int, update_data: dict) -> Post | No
 
 def delete_post(database: Session, post_id: int) -> bool:
 
-    post = get_post(post_id)
+    post = get_post(database=database,post_id=post_id)
     if post is None:
         return False
 

@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
-from app.crud.crud_user import get_id_by_email, get_user, insert_user_in_database
+from app.crud.crud_user import get_user_by_email, insert_user_in_database
 from app.core.security import hash_password, verify_password_hash
 from app.models.user import User
 from app.schemas.user import UserCreateSchema
@@ -37,7 +37,7 @@ def register_user(database: Session, user_data: UserCreateSchema) -> User:
 
 def authenticate_user(database: Session, email: str, password: str):
     email_normalized = normalize_email(email)
-    user = get_user(database, email_normalized)
+    user = get_user_by_email(database, email_normalized)
     if not user:
         verify_password_hash(password, settings.DUMMY_HASH)
         return False

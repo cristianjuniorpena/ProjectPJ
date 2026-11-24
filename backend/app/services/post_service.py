@@ -10,7 +10,7 @@ from app.schemas.post import PostCreate, PostUpdate
 
 from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError
 
-def instantiate_post(post_data: PostCreate):
+def instantiate_post(post_data: PostCreate, current_user: User):
     post = Post(
         title=post_data.title,
         description=post_data.description,
@@ -29,7 +29,6 @@ def read_post(database: Session, post_id: int) -> Post:
     post = get_post(database, post_id)
     if post is None:
         raise PostNotFoundError()
-
     return post
 
 def verify_current_user_role(current_user: User) -> str:
@@ -42,6 +41,8 @@ def create_post(database: Session, post_data: PostCreate, current_user: User) ->
         raise PostRoleError(
             "Only contractors can create posts."
         )
+
+    post = instantiate_post(post_data=post_data, current_user=current_user)
 
     return insert_post(database, post)
 
@@ -87,4 +88,4 @@ def remove_post(database: Session, post_id: int, current_user: User) -> bool:
     if not deleted:
         raise PostNotFoundError()
 
-    return deleted
+    return post
