@@ -7,7 +7,7 @@ from app.models.post import Post
 from app.exceptions.post_exceptions import PostDeletionConflictError
 
 
-def get_all_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
+def select_all_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
 
     if not 1 <= limit <= 100:
         raise ValueError("Limit must be between 1 and 100")
@@ -24,8 +24,11 @@ def get_all_posts(database: Session, limit: int = 100, offset: int = 0) -> list[
 
     return list(database.scalars(statement).all())
 
+def select_user_posts(database: Session, user_id: int) -> list[Post] | None:
+    query = select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
+    return database.scalars(query).all()
 
-def get_post(database: Session, post_id: int) -> Post | None:
+def select_post(database: Session, post_id: int) -> Post | None:
     if post_id <= 0:
         return None
     return database.get(Post, post_id)
@@ -36,11 +39,9 @@ def insert_post(database: Session, post: Post) -> Post:
         database.add(post)
         database.commit()
         database.refresh(post)
-
     except IntegrityError:
         database.rollback()
         raise
-
     except SQLAlchemyError:
         database.rollback()
         raise
@@ -65,7 +66,7 @@ def verify_invalid_fields(update_data: dict) -> bool:
 
 def update_post(database: Session, post_id: int, update_data: dict) -> Post | None:
 
-    post = get_post(database=database, post_id=post_id)
+    post = select_post(database=database, post_id=post_id)
     if post is None:
         return None
 
@@ -92,21 +93,18 @@ def update_post(database: Session, post_id: int, update_data: dict) -> Post | No
 
 def delete_post(database: Session, post_id: int) -> bool:
 
-    post = get_post(database=database,post_id=post_id)
+    post = select_post(database=database,post_id=post_id)
     if post is None:
         return False
 
     try:
         database.delete(post)
         database.commit()
-
     except IntegrityError as error:
         database.rollback()
-
         raise PostDeletionConflictError(
             "Post cannot be deleted because of a database constraint."
         ) from error
-
     except SQLAlchemyError:
         database.rollback()
         raise

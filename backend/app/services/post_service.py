@@ -1,7 +1,7 @@
 
 from sqlalchemy.orm import Session
 
-from app.crud.crud_post import get_all_posts, get_post, insert_post, update_post, delete_post
+from app.crud.crud_post import select_all_posts, select_post, select_user_posts,insert_post, update_post, delete_post
 
 from app.models.post import Post
 from app.models.user import User
@@ -22,14 +22,16 @@ def instantiate_post(post_data: PostCreate, current_user: User):
     return post
 
 def list_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
-    return get_all_posts(database, limit, offset)
-
+    return select_all_posts(database, limit, offset)
 
 def read_post(database: Session, post_id: int) -> Post:
-    post = get_post(database, post_id)
+    post = select_post(database, post_id)
     if post is None:
         raise PostNotFoundError()
     return post
+
+def read_current_user_posts(database: Session, current_user: User) -> list[Post]:
+    return select_user_posts(database=database, user_id=current_user.id)
 
 def verify_current_user_role(current_user: User) -> str:
     return current_user.role

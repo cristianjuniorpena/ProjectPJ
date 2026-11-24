@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import oauth2_scheme
-from app.crud.crud_user import get_user
+from app.crud.crud_user import select_user
 from app.database.session import SessionLocal
 from app.models.user import User
 from app.schemas.auth import TokenData
@@ -33,7 +33,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], database: An
         token_data = TokenData(user_id=int(payload["sub"]), email=payload.get("email"))
     except (InvalidTokenError, KeyError, TypeError, ValueError):
         raise credentials_exception from None
-    user = get_user(database, user_id=token_data.user_id)
+    user = select_user(database, user_id=token_data.user_id)
     if user is None:
         raise credentials_exception
 
