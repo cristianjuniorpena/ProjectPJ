@@ -27,6 +27,15 @@ current_user_dependencie = Annotated[User, Depends(get_current_user)]
 def get_all_posts(database: database_dependencie, limit: int = Query(default=20, ge=1, le=100), offset: int = Query(default=0, ge=0)):
     return list_posts(database, limit, offset)
 
+@post_router.get("/my-posts", response_model=list[PostRead], status_code=status.HTTP_200_OK)
+def get_my_posts(database: database_dependencie, current_user: current_user_dependencie):
+    try:
+        return read_current_user_posts(database=database, current_user=current_user)
+    except PostRoleError as error:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(error)
+        )
 
 @post_router.get("/{post_id}", response_model=PostRead, status_code=status.HTTP_200_OK)
 def get_post(database: database_dependencie, post_id: int):
@@ -38,10 +47,6 @@ def get_post(database: database_dependencie, post_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Post not found"
         )
-
-@post_router.get("/my-posts", response_model=list[PostRead], status_code=status.HTTP_200_OK)
-def get_my_posts(database: database_dependencie, current_user: current_user_dependencie):
-    return read_current_user_posts(database=database, current_user=current_user)
 
 @post_router.post("/", response_model=PostRead, status_code=status.HTTP_201_CREATED)
 def create_new_post(post_data: PostCreate, database: database_dependencie, current_user: current_user_dependencie):

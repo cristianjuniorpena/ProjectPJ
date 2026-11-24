@@ -14,12 +14,14 @@ auth_router = APIRouter(
     tags=["Authentication"],
 )
 
+database_dependencie = Annotated[Session, Depends(get_database)]
+
 @auth_router.post("/register", response_model=UserReadSchema, status_code=status.HTTP_201_CREATED)
-async def create_user(user_data: UserCreateSchema, database: Session = Depends(get_database),):
+async def create_user(user_data: UserCreateSchema, database: database_dependencie):
     return register_user(database, user_data)
 
 @auth_router.post('/login', response_model=TokenResponse, status_code=status.HTTP_200_OK)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], database: Session = Depends(get_database)) -> TokenResponse:
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], database: database_dependencie) -> TokenResponse:
     user = authenticate_user(database, form_data.username, form_data.password)
     if not user:
         raise HTTPException(

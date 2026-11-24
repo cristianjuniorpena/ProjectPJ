@@ -37,7 +37,7 @@ async def delete_user(database: database_dependencie, current_user: current_user
     except UserDeletionConflictError as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"error"
+            detail=f"{error}"
         )
     return {
         'status' : 'sucesso',

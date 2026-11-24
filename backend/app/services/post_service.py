@@ -31,15 +31,14 @@ def read_post(database: Session, post_id: int) -> Post:
     return post
 
 def read_current_user_posts(database: Session, current_user: User) -> list[Post]:
+    if current_user.role != "contractor":
+         raise PostRoleError(
+            "Only contractors can create posts."
+        )
     return select_user_posts(database=database, user_id=current_user.id)
 
-def verify_current_user_role(current_user: User) -> str:
-    return current_user.role
-
 def create_post(database: Session, post_data: PostCreate, current_user: User) -> Post:
-    current_user_role = verify_current_user_role(current_user=current_user)
-
-    if current_user_role != "contractor":
+    if current_user.role != "contractor":
         raise PostRoleError(
             "Only contractors can create posts."
         )
