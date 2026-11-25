@@ -75,10 +75,7 @@ def update_existing_post(post_id: int, post_data: PostUpdate, database: database
         )
 
 
-@post_router.delete(
-    "/{post_id}",
-    status_code=status.HTTP_204_NO_CONTENT
-)
+@post_router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_existing_post(post_id: int, database: database_dependencie, current_user: current_user_dependencie):
     try:
         remove_post(database, post_id, current_user)
@@ -100,8 +97,3 @@ def delete_existing_post(post_id: int, database: database_dependencie, current_u
             status_code=status.HTTP_409_CONFLICT,
             detail="Post cannot be deleted due to related records"
         )
-
-    return { 
-        "status" : "sucesso",
-        "mensagem" : f"post de id {post_id} deletado"
-        }
