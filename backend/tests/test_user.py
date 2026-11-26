@@ -1,13 +1,7 @@
 import pytest
 
 from app.models.user import User
-from app.crud.crud_user import (
-    select_user_by_email,
-    select_user,
-    select_users_in_database,
-    insert_user_in_database,
-    delete_user_in_database,
-)
+from app.crud.crud_user import (select_user_by_email, select_user, insert_user_in_database, delete_user_in_database)
 from app.exceptions.user_exceptions import UserAlreadyExistsError
 
 

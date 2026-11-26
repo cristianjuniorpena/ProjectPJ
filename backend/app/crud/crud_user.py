@@ -1,8 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 
 from app.models.user import User
+from app.schemas.user import UserReadSchema
 from app.exceptions.user_exceptions import UserAlreadyExistsError, UserDeletionConflictError
 
 
@@ -20,8 +21,11 @@ def select_users_in_database(database: Session, limit: int = 100, offset: int = 
     if offset < 0:
         raise ValueError("Offset cannot be negative")
 
+    fields_user_read_schema = [getattr(User, field) for field in UserReadSchema.model_fields.keys()]
+
     statement = (
         select(User)
+        .options(load_only(*fields_user_read_schema))
         .order_by(User.id)
         .limit(limit)
         .offset(offset)

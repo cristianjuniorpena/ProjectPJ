@@ -19,7 +19,7 @@ database_dependencie = Annotated[Session, Depends(get_database)]
 current_user_dependencie = Annotated[User, Depends(get_current_user)]
 
 @user_router.get('/', status_code=status.HTTP_200_OK)
-async def get_all_users(database: database_dependencie):
+def get_all_users(database: database_dependencie):
     all_users = list_users(database)
     return {
         'status' : 'ok',
@@ -27,11 +27,11 @@ async def get_all_users(database: database_dependencie):
         }   
 
 @user_router.get('/me', response_model=UserReadSchema, status_code=status.HTTP_200_OK)
-async def read_user_me(current_user: current_user_dependencie) -> User:
+def read_user_me(current_user: current_user_dependencie) -> User:
     return current_user
 
 @user_router.delete('/delete', status_code=status.HTTP_200_OK)
-async def delete_user(database: database_dependencie, current_user: current_user_dependencie):
+def delete_user(database: database_dependencie, current_user: current_user_dependencie):
     try:
         remove_user(database=database, user_id=current_user.id)
     except UserDeletionConflictError as error:

@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 
 import pytest
 
@@ -11,9 +12,8 @@ from app.main import app
 from app.database.base import Base
 from app.api.dependencies import get_database
 
-# Registrar os modelos no metadata
-from app.models.user import User
-from app.models.post import Post
+load_dotenv()
+
 
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")

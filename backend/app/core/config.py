@@ -1,13 +1,18 @@
-import os
-from pydantic import BaseModel
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-load_dotenv()
 
-class Settings(BaseModel):
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
-    ALGORITHM: str = os.getenv("ALGORITHM")
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-    ACCESS_TOKEN_EXPIRE_MINUTES: str = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-    DUMMY_HASH: str = os.getenv("DUMMY_HASH")
+class Settings(BaseSettings):
+    DATABASE_URL: str
+    ALGORITHM: str
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    DUMMY_HASH: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+
 settings = Settings()
