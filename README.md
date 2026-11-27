@@ -8,7 +8,7 @@ Além da aplicação em si, o repositório tem um objetivo explícito de aprendi
 
 ## Sobre o projeto
 
-O domínio é simples de propósito, o que permite concentrar o esforço nos problemas que realmente importam em uma API: autenticação, autorização, integridade de dados, separação de responsabilidades e evolução segura do schema.
+O domínio é simples de propósito, o que permite concentrar o esforço nos problemas que realmente importam em uma API: autenticação, autorização, integridade de dados, separação de responsabilidades e evolução segura do schema, login e cadastro podem demorar até 1 minuto para funcionarem devido as limitações da hospedagem do render.
 
 Regras de negócio centrais:
 
