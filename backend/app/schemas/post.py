@@ -28,11 +28,34 @@ class PostUpdate(BaseModel):
                 raise ValueError(f"{field} cannot be null")
 
         return self
+    
+# class PostRead(BaseModel):
+#     id: int
+#     user_id: int
+#     title: str
+#     description: str
+#     category: str
+#     budget: Decimal | None
+#     status: Literal["open", "closed"]
+#     created_at: datetime
+#     updated_at: datetime
 
+#     model_config = ConfigDict(from_attributes=True)    
+
+class ContractorPublic(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 class PostRead(BaseModel):
     id: int
     user_id: int
+
+    contractor: ContractorPublic = Field(
+        validation_alias="user"
+    )
+
     title: str
     description: str
     category: str
@@ -42,3 +65,19 @@ class PostRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class PostReadAllPosts(BaseModel):
+    id: int
+    user_id: int
+    contractor: ContractorPublic
+
+    title: str
+    description: str
+    category: str
+    budget: Decimal | None
+    status: Literal["open", "closed"]
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+

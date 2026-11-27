@@ -8,7 +8,7 @@ Além da aplicação em si, o repositório tem um objetivo explícito de aprendi
 
 ## Sobre o projeto
 
-O domínio é simples de propósito, o que permite concentrar o esforço nos problemas que realmente importam em uma API: autenticação, autorização, integridade de dados, separação de responsabilidades e evolução segura do schema.
+O domínio é simples de propósito, o que permite concentrar o esforço nos problemas que realmente importam em uma API: autenticação, autorização, integridade de dados, separação de responsabilidades e evolução segura do schema, login e cadastro podem demorar até 1 minuto para funcionarem devido as limitações da hospedagem do render.
 
 Regras de negócio centrais:
 
@@ -26,10 +26,10 @@ Regras de negócio centrais:
 | Login com JWT | Funcional (`POST /auth/login`, OAuth2 Password Flow) |
 | Proteção de rotas com Bearer token | Funcional (`GET /user/me`) |
 | Modelagem de `users` e `posts` + migração Alembic | Concluída |
-| CRUD de publicações | Não iniciado |
-| Autorização por papel (`contractor` / `provider`) | Não iniciada |
-| Testes automatizados | Não iniciados |
-| Frontend | Apenas o scaffold Vite + React; ainda não consome a API |
+| CRUD de publicações | Concluído |
+| Autorização por papel (`contractor` / `provider`) | Concluído |
+| Testes automatizados | Concluído |
+| Frontend | Completo Vite + React; já consome a API |
 
 Este README é atualizado conforme o projeto avança.
 
@@ -149,14 +149,11 @@ Pontos que explicam o desenho:
 | `POST` | `/auth/register` | Cadastra um usuário (`contractor` ou `provider`) | Pública |
 | `POST` | `/auth/login` | Autentica e devolve o JWT (form-urlencoded) | Pública |
 | `GET` | `/user/me` | Dados do usuário autenticado | Bearer token |
-| `GET` | `/user/` | Lista usuários | **Pública — em correção** |
-| `DELETE` | `/user/delete` | Exclui usuário por e-mail | **Pública — em correção** |
+| `GET` | `/user/` | Lista usuários | **Privada** |
 | `GET` | `/database-test` | Verifica a conexão com o banco | Pública |
 | `GET` | `/status` | Health check | Pública |
 
 Documentação interativa (Swagger UI) em `/docs`, com botão **Authorize** para testar rotas protegidas.
-
-> As rotas `GET /user/` e `DELETE /user/delete` ainda não estão protegidas e não possuem `response_model` — são as próximas a serem corrigidas (ver Roadmap). Não use este estado em produção.
 
 ## Decisões de engenharia
 
@@ -227,11 +224,11 @@ python -c "import secrets; from pwdlib import PasswordHash; print(PasswordHash.r
 - [x] Cadastro com hash Argon2 e validação Pydantic
 - [x] Login com JWT (OAuth2 Password Flow)
 - [x] Dependência `get_current_user` e rota `GET /user/me`
-- [ ] Proteger `GET /user/` e `DELETE /user/delete`; eliminar exposição de `password_hash`
-- [ ] Autorização por papel (`require_contractor` / `require_provider`)
-- [ ] CRUD de publicações com verificação de propriedade
-- [ ] Testes automatizados (autenticação, autorização e regras de negócio)
-- [ ] Integração do frontend com a API
+- [x] Proteger `GET /user/` e `DELETE /user/delete`; eliminar exposição de `password_hash`
+- [x] Autorização por papel (`require_contractor` / `require_provider`)
+- [x] CRUD de publicações com verificação de propriedade
+- [x] Testes automatizados (autenticação, autorização e regras de negócio)
+- [x] Integração do frontend com a API
 
 ## Sobre o desenvolvimento
 

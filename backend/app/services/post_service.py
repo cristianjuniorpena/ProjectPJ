@@ -1,3 +1,4 @@
+from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
@@ -8,7 +9,7 @@ from app.models.user import User
 
 from app.schemas.post import PostCreate, PostUpdate
 
-from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError
+from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError, MinBudgetExceedMaxBudget
 
 def instantiate_post(post_data: PostCreate, current_user: User):
     post = Post(
@@ -21,8 +22,30 @@ def instantiate_post(post_data: PostCreate, current_user: User):
     )
     return post
 
-def list_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
-    return select_all_posts(database=database, limit=limit, offset=offset)
+def list_posts(
+    database: Session,
+    limit: int = 20,
+    offset: int = 0,
+    category: str | None = None,
+    status: str | None = None,
+    search: str | None = None,
+    min_budget: Decimal | None = None,
+    max_budget: Decimal | None = None,
+) -> list[Post]:
+
+    if min_budget is not None and max_budget is not None and min_budget > max_budget:
+        raise MinBudgetExceedMaxBudget
+
+    return select_all_posts(
+        database=database,
+        limit=limit,
+        offset=offset,
+        category=category,
+        status=status,
+        search=search,
+        min_budget=min_budget,
+        max_budget=max_budget
+    )
 
 def read_post(database: Session, post_id: int) -> Post:
     post = select_post(database, post_id)

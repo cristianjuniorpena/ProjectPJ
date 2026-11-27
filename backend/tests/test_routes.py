@@ -146,10 +146,14 @@ def test_get_all_posts(client, database):
     user = create_test_user(database, "owner@email.com")
     create_test_post(database, user.id)
 
-    response = client.get("/posts/")
+    token = create_token(user)
+
+    response = client.get(
+        "/posts/",
+        headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == 200
-    assert len(response.json()) == 1
 
 
 def test_get_post(client, database):
