@@ -1,5 +1,7 @@
 
-from typing import Annotated
+from typing import Annotated, Literal
+
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -7,9 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_database, get_current_user
 from app.models.user import User
-from app.schemas.post import PostCreate, PostUpdate, PostRead
+from app.schemas.post import PostCreate, PostUpdate, PostRead, PostReadAllPosts
 from app.services.post_service import list_posts, read_post, read_current_user_posts,create_post, edit_post, remove_post
-from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError, PostDeletionConflictError
+from app.exceptions.post_exceptions import PostNotFoundError, PostPermissionError, PostRoleError, PostDeletionConflictError, MinBudgetExceedMaxBudget
 
 
 
@@ -23,9 +25,37 @@ database_dependencie = Annotated[Session, Depends(get_database)]
 current_user_dependencie = Annotated[User, Depends(get_current_user)]
 
 
-@post_router.get("/", response_model=list[PostRead], status_code=status.HTTP_200_OK)
-def get_all_posts(database: database_dependencie, limit: int = Query(default=20, ge=1, le=100), offset: int = Query(default=0, ge=0)):
-    return list_posts(database, limit, offset)
+
+@post_router.get("/", response_model=list[PostRead], status_code=200)
+def get_all_posts(
+    database: database_dependencie,
+    current_user: current_user_dependencie,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    category: str | None = Query(default=None, min_length=2, max_length=100),
+    status: Literal["open", "closed"] | None = None,
+    search: str | None = Query(default=None, min_length=1, max_length=150),
+    min_budget: Decimal | None = Query(default=None, ge=0),
+    max_budget: Decimal | None = Query(default=None, ge=0)
+):
+
+    try:
+        return list_posts(
+            database=database,
+            limit=limit,
+            offset=offset,
+            category=category,
+            status=status,
+            search=search,
+            min_budget=min_budget,
+            max_budget=max_budget
+        )
+    except MinBudgetExceedMaxBudget:
+        raise HTTPException(
+            status_code=422,
+            detail="Minimum budget cannot exceed maximum budget"
+        )
+
 
 @post_router.get("/my-posts", response_model=list[PostRead], status_code=status.HTTP_200_OK)
 def get_my_posts(database: database_dependencie, current_user: current_user_dependencie):

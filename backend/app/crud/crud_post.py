@@ -1,13 +1,23 @@
-
-from sqlalchemy import select
+from decimal import Decimal
+from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.post import Post
 from app.exceptions.post_exceptions import PostDeletionConflictError
 
 
-def select_all_posts(database: Session, limit: int = 100, offset: int = 0) -> list[Post]:
+
+def select_all_posts(
+    database: Session,
+    limit: int = 20,
+    offset: int = 0,
+    category: str | None = None,
+    status: str | None = None,
+    search: str | None = None,
+    min_budget: Decimal | None = None,
+    max_budget: Decimal | None = None
+) -> list[Post]:
 
     if not 1 <= limit <= 100:
         raise ValueError("Limit must be between 1 and 100")
@@ -17,12 +27,41 @@ def select_all_posts(database: Session, limit: int = 100, offset: int = 0) -> li
 
     statement = (
         select(Post)
+        .options(joinedload(Post.user))
+    )
+
+    if category:
+        statement = statement.where(
+            Post.category.ilike(f"%{category.strip()}%")
+        )
+
+    if status:
+        statement = statement.where(Post.status == status)
+
+    if search:
+        search_term = f"%{search.strip()}%"
+        statement = statement.where(
+            or_(
+                Post.title.ilike(search_term),
+                Post.description.ilike(search_term)
+            )
+        )
+
+    if min_budget is not None:
+        statement = statement.where(Post.budget >= min_budget)
+
+    if max_budget is not None:
+        statement = statement.where(Post.budget <= max_budget)
+
+    statement = (
+        statement
         .order_by(Post.created_at.desc(), Post.id.desc())
         .limit(limit)
         .offset(offset)
     )
 
     return list(database.scalars(statement).all())
+
 
 def select_user_posts(database: Session, user_id: int) -> list[Post] | None:
     query = select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())

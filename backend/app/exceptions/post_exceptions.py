@@ -13,3 +13,6 @@ class PostRoleError(Exception):
 
 class PostDeletionConflictError(Exception):
     pass
+
+class MinBudgetExceedMaxBudget(Exception):
+    pass
