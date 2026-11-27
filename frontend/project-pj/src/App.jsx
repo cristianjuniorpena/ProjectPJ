@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard';
 
 import { apiRequest } from './api/client';
 
+import './App.css';
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,14 @@ function App() {
   }
 
   if (loading) {
-    return <p>Verificando sessão...</p>;
+    return (
+      <div className="app-loading">
+        <div className="app-loading__card" role="status">
+          <span className="app-loading__spinner" aria-hidden="true" />
+          Verificando sessão...
+        </div>
+      </div>
+    );
   }
 
   if (user) {
