@@ -1,5 +1,6 @@
 from fastapi import FastAPI, status
 from fastapi import Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -20,8 +21,18 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(post_router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/database-test", status_code=status.HTTP_200_OK)
-async def database_test(database: Session = Depends(get_database)):
+def database_test(database: Session = Depends(get_database)):
     result = database.execute(
         text("SELECT current_database()")
     ).scalar_one()
